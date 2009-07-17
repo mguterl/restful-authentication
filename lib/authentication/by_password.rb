@@ -41,20 +41,23 @@ module Authentication
     #
     module ModelInstanceMethods
       
+      def decrypted_password
+        Crypto.decrypt(crypted_password)
+      end
+      
       # Encrypts the password with the user salt
       def encrypt(password)
-        self.class.password_digest(password, salt)
+        Crypto.encrypt(password)
       end
       
       def authenticated?(password)
-        crypted_password == encrypt(password)
+        crypted_password == Crypto.encrypt(password)
       end
       
       # before filter 
       def encrypt_password
         return if password.blank?
-        self.salt = self.class.make_token if new_record?
-        self.crypted_password = encrypt(password)
+        self.crypted_password = Crypto.encrypt(password)
       end
       def password_required?
         crypted_password.blank? || !password.blank?
